@@ -16,17 +16,33 @@ import android.widget.Toast;
 
 import com.cursoandroidoreo.jamiltondamasceno.organizzeapp.R;
 import com.cursoandroidoreo.jamiltondamasceno.organizzeapp.config.ConfigFirebase;
+import com.cursoandroidoreo.jamiltondamasceno.organizzeapp.helper.Base64Custom;
+import com.cursoandroidoreo.jamiltondamasceno.organizzeapp.model.Usuario;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.prolificinteractive.materialcalendarview.CalendarDay;
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
 import com.prolificinteractive.materialcalendarview.OnMonthChangedListener;
 
+import java.text.DecimalFormat;
+
 public class PrincipalActivity extends AppCompatActivity {
 
-    private FirebaseAuth mAuth;
+    private FirebaseAuth mAuth = ConfigFirebase.getFirebaseAuth();
+    private DatabaseReference mDatabase = ConfigFirebase.getFirebaseDatabase();
+    private DatabaseReference userDatabase;
+    private ValueEventListener valueEventListenerUsuario;
+
     private TextView textoSaudacao, textoSaldo;
     private MaterialCalendarView calendarView;
     private RecyclerView recycler_movimentos;
+
+    private String nome;
+    private Double receitaTotal, despesaTotal, resumoUsuario;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,66 +54,51 @@ public class PrincipalActivity extends AppCompatActivity {
 
         textoSaudacao = findViewById(R.id.tv_welcome);
         textoSaldo = findViewById(R.id.tv_saldo);
-
         calendarView = findViewById(R.id.calendarView);
-        configCalendarView();
-
         recycler_movimentos = findViewById(R.id.recycler_movimentos);
 
+        configCalendarView();
 
-
-//        configuração padrão do floatingActionButton
-//        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-//        fab.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
-//            }
-//        });
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_principal, menu);
-        return super.onCreateOptionsMenu(menu);
-    }
+    public void recuperarResumo () {
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()){
-            case R.id.menu_sair:
-                mAuth = ConfigFirebase.getFirebaseAuth();
-                mAuth.signOut();
-                startActivity(new Intent(this, MainActivity.class));
-                finish();
-                break;
-        }
-        return super.onOptionsItemSelected(item);
-    }
+//        recuperar despesaTotal e receitaTotal do firebaseDatabase
+        String emailUsuario = mAuth.getCurrentUser().getEmail();
+        String idUsuario = Base64Custom.codificarBase64(emailUsuario);
+        userDatabase = mDatabase.child("usuarios").child(idUsuario);
 
-    public void btAddReceita(View view) {
-        startActivity(new Intent(this, ReceitasActivity.class));
-    }
+        valueEventListenerUsuario = userDatabase.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Usuario usuario = dataSnapshot.getValue(Usuario.class);
 
-    public void btAddDespesa(View view) {
-        startActivity(new Intent(this, DespesasActivity.class));
-    }
+                nome = usuario.getNome();
+                despesaTotal = usuario.getDespesaTotal();
+                receitaTotal = usuario.getReceitaTotal();
+                resumoUsuario = receitaTotal - despesaTotal;
 
-    public void btSair(View view) {
-        mAuth = ConfigFirebase.getFirebaseAuth();
-        mAuth.signOut();
-        finish();
+                textoSaudacao.setText("Olá, " + nome);
+
+//                formatar o valor do saldo para R$0,00
+                DecimalFormat decimalFormat = new DecimalFormat("0.00");
+                String resultadoFormatado = decimalFormat.format(resumoUsuario);
+                textoSaldo.setText("R$ " + resultadoFormatado);
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+        Log.i("evento", "evento foi adicionado");
+
     }
 
     public void configCalendarView() {
 
-//        configurar limite do calendar
-//        calendarView.state().edit()
-//                .setMinimumDate(CalendarDay.from(2016, 1, 1))
-//                .setMaximumDate(CalendarDay.from(2019, 11, 1))
-//                .commit();
-
+//        configuração do calendário
         CharSequence meses[] = {
                 "Janeiro",
                 "Fevereiro",
@@ -122,4 +123,50 @@ public class PrincipalActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_principal, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch (item.getItemId()){
+            case R.id.menu_sair:
+                mAuth.signOut();
+                startActivity(new Intent(this, MainActivity.class));
+                finish();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+
+    }
+
+    public void btSair(View view) {
+        mAuth = ConfigFirebase.getFirebaseAuth();
+        mAuth.signOut();
+        finish();
+    }
+
+    public void btAddReceita(View view) {
+        startActivity(new Intent(this, ReceitasActivity.class));
+    }
+
+    public void btAddDespesa(View view) {
+        startActivity(new Intent(this, DespesasActivity.class));
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        recuperarResumo();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        userDatabase.removeEventListener(valueEventListenerUsuario);
+        Log.i("evento", "evento foi removido");
+    }
 }
