@@ -3,6 +3,7 @@ package com.cursoandroidoreo.jamiltondamasceno.organizzeapp.activity;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -23,10 +24,11 @@ public class DespesasActivity extends AppCompatActivity {
 
     private EditText campoValor;
     private TextInputEditText campoData, campoCategoria, campoDescricao;
-    private Movimentacao movimentacao;
 
     private DatabaseReference mDatabase = ConfigFirebase.getFirebaseDatabase();
     private FirebaseAuth mAuth = ConfigFirebase.getFirebaseAuth();
+
+    private Movimentacao movimentacao;
     private Double despesaTotal;
 
     @Override
@@ -105,12 +107,13 @@ public class DespesasActivity extends AppCompatActivity {
 
     }
 
-//    recupera a despesa total do firebaseDatabase
     public void recuperarDespesaTotal() {
+
+//        recupera a despesa total do firebaseDatabase
         String emailUsuario = mAuth.getCurrentUser().getEmail();
         String idUsuario = Base64Custom.codificarBase64(emailUsuario);
-        DatabaseReference userDatabase = mDatabase.child("usuarios").child(idUsuario);
 
+        DatabaseReference userDatabase = mDatabase.child("usuarios").child(idUsuario);
         userDatabase.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -123,6 +126,7 @@ public class DespesasActivity extends AppCompatActivity {
 
             }
         });
+
     }
 
 //    atualiza a despesa total no firebaseDatabase
