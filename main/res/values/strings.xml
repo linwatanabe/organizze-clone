@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">OrganizzeApp</string>
+    <string name="title_activity_principal">PrincipalActivity</string>
+    <string name="campo_valor">R$0.00</string>
+    <string name="campo_data">ex. 01/01/2018</string>
+
+    <!-- Campo adicionar receitas. -->
+    <string name="campo_categoria_receita">ex. Meu salário</string>
+    <string name="campo_descricao_receita">ex. Minha empresa</string>
+
+    <!-- Campo adicionar despesas. -->
+    <string name="campo_categoria_despesa">ex. Casa</string>
+    <string name="campo_descricao_despesa">ex. Aluguel</string>
+    <string name="menu_sair">Sair</string>
+
+</resources>
