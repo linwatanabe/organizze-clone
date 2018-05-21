@@ -9,7 +9,7 @@ import com.google.firebase.database.Exclude;
 
 public class Movimentacao {
 
-    private String data, categoria, descricao, tipo;
+    private String data, categoria, descricao, tipo, key;
     private double valor;
 
     public Movimentacao() {
@@ -67,5 +67,13 @@ public class Movimentacao {
 
     public void setValor(double valor) {
         this.valor = valor;
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
     }
 }
