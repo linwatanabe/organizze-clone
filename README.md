@@ -1,4 +1,3 @@
 # organizze-clone
 
->Projeto do curso android oreo
-  >Sessão organizze clone
+Projeto do curso android oreo \n sessão organizze clone
