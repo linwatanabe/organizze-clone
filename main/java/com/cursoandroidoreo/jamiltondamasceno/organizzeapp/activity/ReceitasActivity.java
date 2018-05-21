@@ -58,7 +58,7 @@ public class ReceitasActivity extends AppCompatActivity {
             movimentacao.setData(data);
             movimentacao.setCategoria(campoCategoria.getText().toString());
             movimentacao.setDescricao(campoDescricao.getText().toString());
-            movimentacao.setTipo("Receita");
+            movimentacao.setTipo("receita");
 
 //            salvar e atualizar valor da receitaTotal no firebaseDatabase
             Double receitaAtualizada = receitaTotal + valorRecuperado;
